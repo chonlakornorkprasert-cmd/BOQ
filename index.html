@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="th">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BOQ Estimate</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Construction Cost Estimator</p>
+            <h1>ประเมินราคาก่อสร้างเบื้องต้น</h1>
+          </div>
+          <div class="topbar-actions">
+            <button id="printForBank" class="print-button" type="button">BOQ</button>
+            <div class="summary-pill">
+              <span>พื้นที่รวม</span>
+              <strong id="totalAreaTop">0 ตร.ม.</strong>
+            </div>
+          </div>
+        </header>
+
+        <section class="print-cover">
+          <p class="eyebrow">Bank Submission Report</p>
+          <h2>รายงานประมาณราคาก่อสร้างเพื่อยื่นธนาคาร</h2>
+          <div class="print-meta">
+            <span>จังหวัดยโสธร</span>
+            <span>แหล่งราคากลาง TPSO</span>
+            <span id="printGeneratedAt">วันที่พิมพ์ -</span>
+          </div>
+        </section>
+
+        <section class="source-strip">
+          <div>
+            <span>ราคากลางอ้างอิง</span>
+            <strong>จังหวัดยโสธร</strong>
+          </div>
+          <div>
+            <span>แหล่งข้อมูล</span>
+            <strong>TPSO ราคาวัสดุก่อสร้างรายจังหวัด</strong>
+          </div>
+          <div>
+            <span>งวดข้อมูล</span>
+            <strong>พฤษภาคม 2569</strong>
+          </div>
+        </section>
+
+        <section class="workflow-strip" aria-label="Calculation workflow">
+          <div class="workflow-step active"><span>1</span><strong>Building Type</strong></div>
+          <div class="workflow-step active"><span>2</span><strong>Style</strong></div>
+          <div class="workflow-step active"><span>3</span><strong>Room Configuration</strong></div>
+          <div class="workflow-step active"><span>4</span><strong>Material Grade</strong></div>
+          <div class="workflow-step active"><span>5</span><strong>BOQ Generator</strong></div>
+          <div class="workflow-step active"><span>6</span><strong>Cost Estimation</strong></div>
+        </section>
+
+        <section class="control-grid">
+          <div class="panel building-panel">
+            <div class="panel-header">
+              <p class="step-label">Step 1 / Building Type</p>
+              <h2>ประเภทอาคาร</h2>
+              <p>เลือกประเภทเพื่อโหลดค่าเริ่มต้นของจำนวนห้องและพื้นที่ประกอบ</p>
+            </div>
+            <div id="buildingTypes" class="segmented" aria-label="ประเภทอาคาร"></div>
+          </div>
+
+          <div class="panel style-panel">
+            <div class="panel-header">
+              <p class="step-label">Step 2 / Style</p>
+              <h2>สไตล์อาคาร</h2>
+              <p>เลือกแนวทางงานออกแบบเพื่อปรับตัวคูณราคาประมาณการ</p>
+            </div>
+            <div id="buildingStyles" class="style-list" aria-label="สไตล์อาคาร"></div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header with-action">
+            <div>
+              <p class="step-label">Step 3 / Room Configuration</p>
+              <h2>เลือกจำนวนห้อง</h2>
+              <p>ปรับจำนวนและขนาดมาตรฐานของแต่ละห้องได้ทันที</p>
+            </div>
+            <button id="resetDefaults" class="ghost-button" type="button">รีเซ็ตค่าเริ่มต้น</button>
+          </div>
+          <div id="roomRows" class="room-table"></div>
+        </section>
+
+        <section class="control-grid">
+          <div class="panel grade-panel">
+            <div class="panel-header">
+              <p class="step-label">Step 4 / Material Grade</p>
+              <h2>เกรดวัสดุ</h2>
+              <p>ราคาต่อตารางเมตรตั้งต้นสำหรับประมาณการ และแก้เองได้ตามแบบ/ปริมาณจริง</p>
+            </div>
+            <div id="materialGrades" class="grade-list"></div>
+            <label class="field compact-field">
+              <span>ราคาต่อตร.ม.</span>
+              <input id="rateInput" type="number" min="0" step="500">
+            </label>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <p class="step-label">Room Configuration / Add-on Area</p>
+              <h2>พื้นที่ประกอบ</h2>
+              <p>ระบบรวมทางเดิน ระเบียง ที่จอดรถ และพื้นที่ service ให้อัตโนมัติ</p>
+            </div>
+            <div class="area-controls">
+              <label class="field">
+                <span>ผนัง / ทางเดิน / Circulation (%)</span>
+                <input id="circulationInput" type="number" min="0" max="30" step="1">
+              </label>
+              <label class="toggle-row">
+                <span>ระเบียง / เฉลียง</span>
+                <input id="balconyToggle" type="checkbox">
+              </label>
+              <label class="field">
+                <span>ขนาดระเบียง / เฉลียง (ตร.ม.)</span>
+                <input id="balconyAreaInput" type="number" min="0" step="1">
+              </label>
+              <label class="field">
+                <span>ที่จอดรถ (คัน)</span>
+                <input id="parkingInput" type="number" min="0" max="3" step="1">
+              </label>
+              <label class="field">
+                <span>พื้นที่ต่อคัน (ตร.ม.)</span>
+                <input id="parkingAreaInput" type="number" min="0" step="1">
+              </label>
+              <label class="field">
+                <span>พื้นที่ service เพิ่มเติม (ตร.ม.)</span>
+                <input id="serviceAreaInput" type="number" min="0" step="1">
+              </label>
+            </div>
+          </div>
+        </section>
+
+        <section class="calc-grid">
+          <div class="panel">
+            <div class="panel-header">
+              <p class="step-label">Step 5 / BOQ Generator</p>
+              <h2>BOQ เบื้องต้น</h2>
+              <p>สัดส่วนหมวดงานคำนวณจากราคาก่อสร้างโดยประมาณ</p>
+            </div>
+            <div id="boqRows" class="boq-list"></div>
+          </div>
+          <aside class="estimate-card">
+            <p class="eyebrow">Step 6 / Cost Estimation</p>
+            <h2 id="totalCost">0 บาท</h2>
+            <div class="metric-list">
+              <div>
+                <span>พื้นที่ห้อง</span>
+                <strong id="roomArea">0 ตร.ม.</strong>
+              </div>
+              <div>
+                <span>พื้นที่ประกอบ</span>
+                <strong id="addonArea">0 ตร.ม.</strong>
+              </div>
+              <div>
+                <span>พื้นที่รวมคำนวณ</span>
+                <strong id="totalArea">0 ตร.ม.</strong>
+              </div>
+              <div>
+                <span>ราคาต่อตร.ม.</span>
+                <strong id="rateDisplay">0 บาท</strong>
+              </div>
+              <div>
+                <span>ตัวคูณสไตล์</span>
+                <strong id="styleMultiplierDisplay">1.00x</strong>
+              </div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="panel pdf-boq-panel">
+          <div class="panel-header with-action">
+            <div>
+              <p class="step-label">PDF / Print Detail</p>
+              <h2>BOQ รายละเอียดสำหรับ PDF</h2>
+              <p>แบ่งหมวดงาน ปริมาณวัสดุ ราคาวัสดุ ค่าแรง และราคารวม สำหรับพิมพ์หรือบันทึกเป็น PDF</p>
+            </div>
+            <button id="printPdfBoq" class="print-button secondary-print" type="button">พิมพ์ PDF BOQ</button>
+          </div>
+          <div id="pdfBoqSections" class="pdf-boq-list"></div>
+          <div class="pdf-grand-total">
+            <span>ยอดรวมทั้งโครงการ</span>
+            <strong id="pdfGrandTotal">0 บาท</strong>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header with-action">
+            <div>
+              <h2>เปรียบเทียบ BOQ Vendor</h2>
+              <p>กรอกราคาที่ vendor เสนอแยกตามหมวดงาน เพื่อเทียบกับ BOQ ประมาณการของระบบ</p>
+            </div>
+            <div class="compare-actions">
+              <button id="copyEstimateToVendor" class="ghost-button" type="button">เติมตามราคาประเมิน</button>
+              <button id="clearVendorBoq" class="ghost-button danger-button" type="button">ล้างราคา vendor</button>
+            </div>
+          </div>
+          <div class="vendor-summary">
+            <div>
+              <span>ราคาประมาณการ</span>
+              <strong id="estimateTotalCompare">0 บาท</strong>
+            </div>
+            <div>
+              <span>ราคา vendor</span>
+              <strong id="vendorTotalCompare">0 บาท</strong>
+            </div>
+            <div>
+              <span>ส่วนต่างรวม</span>
+              <strong id="vendorDiffCompare">0 บาท</strong>
+            </div>
+            <div>
+              <span>ผลเทียบ</span>
+              <strong id="vendorStatusCompare">ยังไม่กรอก</strong>
+            </div>
+          </div>
+          <div id="vendorRows" class="vendor-list"></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header with-action">
+            <div>
+              <h2>ราคากลางวัสดุหลัก จังหวัดยโสธร</h2>
+              <p>รายการอ้างอิงจาก TPSO ใช้ตรวจทานราคาต่อหน่วยใน BOQ รายละเอียด โดยแสดงราคาแบบรวม VAT</p>
+            </div>
+            <a class="source-link" href="https://index.tpso.go.th/construction-material-prices/prices-building-materials/35" target="_blank" rel="noreferrer">เปิดข้อมูล TPSO</a>
+          </div>
+          <div id="materialRows" class="material-list"></div>
+        </section>
+      </section>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
